@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <conio.h>
-
 
 int choose;
 
@@ -18,15 +16,15 @@ typedef struct {
     int hp, atk, def;
 }Card;
 
-void randomizeCards(Card *player, int *special) {
+void randomizeCards(Card *player) {
     int num;
     for(int i=0; i<5; i++) {
         num = (rand()%10)+1;
         if(num==1) {
             strcpy(player[i].class, "Cavaleiro");
-            player[i].hp = 90;
+            player[i].hp = 80;
             player[i].atk = 45;
-            player[i].def = 50;
+            player[i].def = 70;
         }
         else {
             if(num==2) {
@@ -65,15 +63,15 @@ void randomizeCards(Card *player, int *special) {
                             }
                             else {
                                 if(num==7) {
-                                    strcpy(player[i].class, "Cacador de Demonios");
+                                    strcpy(player[i].class, "Cacador de demonios");
                                     player[i].hp = 45;
                                     player[i].atk = 75;
                                     player[i].def = 20;
                                 }
                                 else {
-                                    strcpy(player[i].class, "Vampiro");
-                                    player[i].hp = 80;
-                                    player[i].atk = 45;
+                                    strcpy(player[i].class, "Druida");
+                                    player[i].hp = 65;
+                                    player[i].atk = 40;
                                     player[i].def = 55;
                                 }
                             }
@@ -83,19 +81,16 @@ void randomizeCards(Card *player, int *special) {
             }
         }
     }
-    for(int i=0; i<3; i++) {
-        special[i] = (rand()%3)+1;
-    }
 }
 
 int mainMenu() {
+
     system("cls");
     printf("----- DSCardGame -----\n");
     printf("1 - Jogar\n");
-    printf("2 - Ver Regras\n");
-    printf("3 - Ver Cartas\n");
-    printf("4 - Ver Habilidades Especiais\n");
-    printf("5 - Sair\n");
+    printf("2 - Ver regras\n");
+    printf("3 - Ver cartas\n");
+    printf("4 - Sair\n");
     scanf("%d", &choose);
     if(choose==1)
         gameStart();
@@ -103,17 +98,15 @@ int mainMenu() {
         viewRules();
     else if(choose==3)
         viewCards();
-    else if(choose==4)
-        viewSpecial();
-    else
+    else 
         return 0;
 }
 
-void gameStart(){
+void gameStart()
+{
     int matchesNumber, turn;
     int selectedCardP1 = 0, selectedCardP2 = 0;
     int cardsAliveP1, cardsAliveP2;
-    int specialP1[3], specialP2[3];
     int firstTurnDoneP1, firstTurnDoneP2;
     int battleCounter;
     Card cardsP1[5], cardsP2[5];
@@ -127,44 +120,31 @@ void gameStart(){
         cardsAliveP1 = cardsAliveP2 = 5;
         firstTurnDoneP1 = firstTurnDoneP2 = 0;
         battleCounter = 1;
-        randomizeCards(cardsP1, specialP1);
-        randomizeCards(cardsP2, specialP2);
+        randomizeCards(cardsP1);
+        randomizeCards(cardsP2);
         while((cardsAliveP1>0) && (cardsAliveP2>0)) {
+            printf("----- Batalha %d -----\n", battleCounter);
             do {
-                printf("----- Batalha %d -----\n", battleCounter);
                 printf("----- Turno do jogador %d! -----\n", turn);
                 printf("1 - Atacar oponente\n");
-                printf("2 - Ver suas habilidades\n\n");
-                if(turn==1)
-                    viewCardInfo(cardsP1);
-                else
-                    viewCardInfo(cardsP2);
+                printf("2 - Ver suas cartas\n\n");
                 printf("Selecione uma opcao: ");
                 scanf("%d", &choose);
                 if(choose==2) {
                     if(turn==1)
-                        useSpecial(specialP1, cardsP1, cardsP2, &turn);
+                        viewCardInfo(cardsP1);
                     else
-                        useSpecial(specialP2, cardsP2, cardsP1, &turn);
+                        viewCardInfo(cardsP2);
                 }
                 else
                     choose = -1;
             }while(choose!=-1);
             printf("Numero da carta: ");
             scanf("%d", &choose);
-            if(turn==1) {
-                while(cardsP1[choose-1].hp<=0) {
-                    printf("Essa carta esta morta! Digite o numero de outra carta: ");
-                    scanf("%d", &choose);
-                }
+            while(cardsP1[choose-1].hp<=0) {
+                printf("Essa carta esta morta! Digite o numero de outra carta: ");
+                scanf("%d", &choose);
             }
-            else {
-                while(cardsP2[choose-1].hp<=0) {
-                    printf("Essa carta esta morta! Digite o numero de outra carta: ");
-                    scanf("%d", &choose);
-                }
-            }
-            system("cls");
             if(turn==1) {
                 selectedCardP1 = choose-1;
                 firstTurnDoneP1 = 1;
@@ -190,172 +170,57 @@ void playerAttack(Card *player1, Card *player2, int cardP1, int cardP2, int *ali
     int damageP1, damageP2;
     damageP1 = player1[cardP1].atk-player2[cardP2].def;
     damageP2 = player2[cardP2].atk-player1[cardP1].def;
-    if(player1[cardP1].def>0)
-        player1[cardP1].def -= 15;
-    if(player2[cardP2].def>0)
-        player2[cardP2].def -= 15;
     if(damageP1<0)
         damageP1 = 0;
     if(damageP2<0)
         damageP2 = 0;
     player1[cardP1].hp -= damageP2;
     player2[cardP2].hp -= damageP1;
-    printf("------------------------------\n");
     printf("Resultados da batalha:\n");
-    printf("P1: O %s (P1) atacou %s (P2)\n", player1[cardP1].class, player2[cardP2].class);
-    printf("P2: Mas %s (P2) atacou de volta!\n\n", player2[cardP2].class);
+    printf("%s atacou %s\n", player1[cardP1].class, player2[cardP2].class);
+    printf("Mas %s atacou de volta!\n\n", player2[cardP2].class);
     if(player1[cardP1].hp<=0) {
-        printf("P1: O %s morreu!\n", player1[cardP1].class);
+        printf("%s morreu!\n", player1[cardP1].class);
         player1[cardP1].hp = 0;
+        cardP1++;
         *aliveP1 -= 1;
     }
     else
-        printf("P1: O %s sobreviveu com %d de HP!\n", player1[cardP1].class, player1[cardP1].hp);
+        printf("%s sobreviveu com %d de HP!\n", player1[cardP1].class, player1[cardP1].hp);
     if(player2[cardP2].hp<=0) {
-        printf("P2: %s morreu!\n", player2[cardP2].class);
+        printf("%s morreu!\n", player2[cardP2].class);
         player2[cardP2].hp = 0;
+        cardP2++;
         *aliveP2 -= 1;
     }
     else
-        printf("P2: O %s sobreviveu com %d de HP\n", player2[cardP2].class, player2[cardP2].hp);
-    printf("------------------------------\n");
-}
-
-void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
-    system("cls");
-    printf("----- Habilidades Especiais disponiveis -----\n\n");
-    printf("1 - Ressurgir dos mortos: %d\n", special[0]);
-    printf("2 - Bencao divina: %d\n", special[1]);
-    printf("3 - Maldicao: %d\n\n", special[2]);
-
-    printf("Selecione uma habilidade ou 0 para voltar: ");
-    scanf("%d", &choose);
-    while(special[choose-1]<=0 && choose>0 && choose<4) {
-        printf("Habilidade indisponivel! Escolha outra: ");
-        scanf("%d", &choose);
-    }
-    //H1
-    if(choose==1) {
-        system("cls");
-        int j = 0;
-        printf("----- Ressurgir dos mortos -----\n");
-        printf("----- Cartas mortas -----\n\n");
-        for(int i=0; i<5; i++) {
-            if(player[i].hp==0) {
-                printf("Carta %d\n", i+1);
-                printf("Classe: %s\n", player[i].class);
-                printf("HP: %d\nATK: %d\nDEF: %d\n\n", player[i].hp, player[i].atk, player[i].def);
-                j++;
-            }
-        }
-        if(j==0) {
-            printf("Voce nao possui cartas para reviver!\n\n");
-            printf("Digite um numero para continuar: ");
-            scanf("%d", &choose);
-        }
-        else {
-            printf("Selecione uma carta para reviver: ");
-            scanf("%d", &choose);
-            if(strcmp(player[choose-1].class, "Cavaleiro")==0)
-                player[choose-1].hp = 90/2;
-            else if(strcmp(player[choose-1].class, "Bandido")==0)
-                player[choose-1].hp = 60/2;
-            else if(strcmp(player[choose-1].class, "Arqueiro")==0)
-                player[choose-1].hp = 55/2;
-            else if(strcmp(player[choose-1].class, "Clerigo")==0)
-                player[choose-1].hp = 70/2;
-            else if(strcmp(player[choose-1].class, "Feiticeiro")==0)
-                player[choose-1].hp = 50/2;
-            else if(strcmp(player[choose-1].class, "Necromante")==0)
-                player[choose-1].hp = 55/2;
-            else if(strcmp(player[choose-1].class, "Cacador de Demonios")==0)
-                player[choose-1].hp = 45/2;
-            else
-                player[choose-1].hp = 80/2;
-
-            printf("Carta %d revivida!\nVida atual do %s: %d\n\n", choose, player[choose-1].class, player[choose-1].hp);
-            special[0]--;
-            printf("Digite um numero para continuar: ");
-            scanf("%d", &choose);
-                if(*playerTurn==1)
-                    *playerTurn = 2;
-                else
-                    *playerTurn = 1;
-            
-        }
-    }
-    //H2
-    else if(choose==2) {
-        system("cls");
-        printf("----- Bencao Divina -----\n");
-        printf("Todas suas cartas receberam +15 de HP!\n\n");
-        for(int i=0; i<5; i++) {
-            if(player[i].hp>0) {
-                player[i].hp += 15;
-                printf("Carta %d\n", i+1);
-                printf("Classe: %s\n", player[i].class);
-                printf("HP: %d\nATK: %d\nDEF: %d\n\n", player[i].hp, player[i].atk, player[i].def);
-            }
-        }
-        special[1]--;
-        printf("Digite um numero para continuar: ");
-        scanf("%d", &choose);
-        if(*playerTurn==1)
-            *playerTurn = 2;
-        else
-            *playerTurn = 1;
-    }
-    //H3
-    else if(choose==3){
-        system("cls");
-        printf("----- Maldicao -----\n");
-        printf("Cartas do oponente:\n\n");
-        for(int i=0; i<5; i++) {
-            if(enemy[i].hp>0) {
-                printf("Carta %d\n", i+1);
-                printf("Classe: %s\n", enemy[i].class);
-                printf("HP: %d\nATK: %d\nDEF: %d\n\n", enemy[i].hp, enemy[i].atk, enemy[i].def);
-            }
-        }
-        printf("Selecione uma carta do oponente para amaldicoar: ");
-        scanf("%d", &choose);
-        while((choose<1 || choose>5) || enemy[choose-1].hp<=0){
-            printf("Nao e possivel amaldicoar uma carta morta ou inexistente, tente novamente: ");
-            scanf("%d", &choose);
-        }
-        enemy[choose-1].def = 0;
-        printf("%s foi amaldicoado!\n\n", enemy[choose-1].class);
-        special[2]--;
-        printf("Digite um numero para continuar: ");
-        scanf("%d", &choose);
-        if(*playerTurn==1)
-            *playerTurn = 2;
-        else
-            *playerTurn = 1;
-    }
-    system("cls");
+        printf("%s sobreviveu com %d de HP\n", player2[cardP2].class, player2[cardP2].hp);
+    if(*playerTurn==1)
+        *playerTurn = 2;
+    else
+        *playerTurn = 1;
 }
 
 void viewCardInfo(Card *player) {
+    system("cls");
     printf("----- Suas cartas -----\n\n");
     for(int i=0; i<5; i++) {
-        if(player[i].hp>0) {
-            printf("Carta %d\n", i+1);
-            printf("Classe: %s\n", player[i].class);
-            printf("HP: %d\nATK: %d\nDEF: %d\n\n", player[i].hp, player[i].atk, player[i].def);
-        }
+        printf("Carta %d\n", i+1);
+        printf("Classe: %s\n", player[i].class);
+        printf("HP: %d\nATK: %d\nDEF: %d\n\n", player[i].hp, player[i].atk, player[i].def);
     }
+    printf("Digite qualquer numero para voltar: ");
+    scanf("%d", &choose);
 }
 
 void viewRules() {
     system("cls");
     printf("----- Regras -----\n\n");
-    printf("Objetivo principal: matar a maior quantidade de inimigos do oponente, vencendo o jogador com o maior numero de personagens vivos\n\n");
-    printf("Turnos: Cada jogador realiza uma determinada acao em seu turno respectivo, como atacar, adicionar efeito ao oponente ou pular sua vez.\n\n");
-    printf("O primeiro jogador de cada turno de uma batalha é escolhido aleatoriamente!\n\n");
-    printf("A cada batalha finalizada, os oponentes perdem 15 de DEF\n\n");
-    printf("- Obs: pular a vez mata uma das cartas do seu deck, portanto use somente se tiver certeza do que esta fazendo\n\n");
-    printf("Cartas: Cada carta possui uma habilidade especial, que podera afetar diretamente o oponente\n\n\n");
+    printf("Objetivo principal: matar a maior quantidade de inimigos do oponente, vencendo o jogador com o maior numero de personagens vivos\n");
+    printf("Turnos: Cada jogador realiza uma determinada acao em seu turno respectivo, como atacar, adicionar efeito ao oponente ou pular sua vez.\n");
+    printf("O jogador do primeiro turno de uma batalha é escolhido aleatoriamente\n");
+    printf("- Obs: pular a vez mata uma das cartas do seu deck, portanto use somente se tiver certeza do que esta fazendo\n");
+    printf("Cartas: Cada carta possui uma habilidade especial, que podera afetar diretamente o oponente\n\n");
     printf("Digite qualquer tecla para voltar ao menu principal: ");
     scanf("%d", &choose);
     //Limpando a tela do console
@@ -367,7 +232,7 @@ void viewCards() {
     printf("----- Cartas -----\n\n");
     printf("Cavaleiro:\n");
     printf("Descricao: Cavaleiro e um personagem de combate corpo a corpo focado em alta defesa e vida, com ataque moderado\n");
-    printf("HP: 90\nATK: 45\nDEF: 50\n\n");
+    printf("HP: 80\nATK: 45\nDEF: 70\n\n");
 
     printf("Bandido:\n");
     printf("Descricao: Agil e sorrateiro, o ladrao possui alto ataque, mas baixa vida e defesa, dependendo de ataques rapidos para evitar ser atingido\n");
@@ -395,37 +260,18 @@ void viewCards() {
     printf("Descricao: Especialista em enfrentar forças das trevas, com alto ataque e habilidades específicas contra criaturas ocultas. Possui resistência média, mas seu dano e letal");
     printf("HP: 55\nATK: 60\nDEF: 45\n\n");
 
-    printf("Vampiro:\n");
-    printf("Descricao: Um inimigo sedento por sangue e destruicao, possui ataque baixo mas HP relativamente alto.");
-    printf("HP: 80\nATK: 45\nDEF: 55\n\n");
+    printf("Druida:\n");
+    printf("Descricao: Classe magica de suporte, o druida pode curar aliados e invocar forças da natureza, equilibrando defesa e HP para resistir mais em combate.");
+    printf("HP: 65\nATK: 45\nDEF: 55\n\n");
 
     printf("Digite qualquer tecla para voltar ao menu principal: ");
     scanf("%d", &choose);
     mainMenu();
 }
 
-void viewSpecial() {
-    system("cls");
-    printf("----- Habilidades Especiais -----\n\n");
-    printf("Obs: E possivel ter no maximo 3 usos de cada habilidade abaixo, sendo o numero randomizado a cada partida para os jogadores\n\n");
-
-    printf("Ressurgir dos mortos:\n");
-    printf("Permite reviver uma carta do jogador que ja morreu, entretanto com metade de HP\n\n");
-    
-    printf("Bencao divina:\n");
-    printf("Aumenta em +15 pontos de HP de todas as cartas do jogador\n\n");
-
-    printf("Maldicao:\n");
-    printf("Permite o jogador escolher uma carta do oponente e quebrar sua defesa\n\n");
-
-    printf("Digite qualquer tecla para voltar ao menu principal: ");
-    scanf("%d", &choose);
-    mainMenu();
-}
 
 int main() {
     srand(time(NULL));
-    system("cls");
     mainMenu();
     return 0;
 }
