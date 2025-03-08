@@ -24,7 +24,7 @@ void randomizeCards(Card *player, int *special) {
         num = (rand()%10)+1;
         if(num==1) {
             strcpy(player[i].class, "Cavaleiro");
-            player[i].hp = 0;
+            player[i].hp = 90;
             player[i].atk = 45;
             player[i].def = 50;
         }
@@ -143,9 +143,9 @@ void gameStart(){
                 scanf("%d", &choose);
                 if(choose==2) {
                     if(turn==1)
-                        useSpecial(specialP1, cardsP1, &turn);
+                        useSpecial(specialP1, cardsP1, cardsP2, &turn);
                     else
-                        useSpecial(specialP2, cardsP2, &turn);
+                        useSpecial(specialP2, cardsP2, cardsP1, &turn);
                 }
                 else
                     choose = -1;
@@ -221,7 +221,7 @@ void playerAttack(Card *player1, Card *player2, int cardP1, int cardP2, int *ali
     printf("------------------------------\n");
 }
 
-void useSpecial(int *special, Card *player, int *playerTurn) {
+void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
     system("cls");
     printf("----- Habilidades Especiais disponiveis -----\n\n");
     printf("1 - Ressurgir dos mortos: %d\n", special[0]);
@@ -277,7 +277,6 @@ void useSpecial(int *special, Card *player, int *playerTurn) {
             special[0]--;
             printf("Digite um numero para continuar: ");
             scanf("%d", &choose);
-            
                 if(*playerTurn==1)
                     *playerTurn = 2;
                 else
@@ -307,10 +306,33 @@ void useSpecial(int *special, Card *player, int *playerTurn) {
             *playerTurn = 1;
     }
     //H3
-
-
-
-
+    else if(choose==3){
+        system("cls");
+        printf("----- Maldicao -----\n");
+        printf("Cartas do oponente:\n\n");
+        for(int i=0; i<5; i++) {
+            if(enemy[i].hp>0) {
+                printf("Carta %d\n", i+1);
+                printf("Classe: %s\n", enemy[i].class);
+                printf("HP: %d\nATK: %d\nDEF: %d\n\n", enemy[i].hp, enemy[i].atk, enemy[i].def);
+            }
+        }
+        printf("Selecione uma carta do oponente para amaldicoar: ");
+        scanf("%d", &choose);
+        while((choose<1 || choose>5) || enemy[choose-1].hp<=0){
+            printf("Nao e possivel amaldicoar uma carta morta ou inexistente, tente novamente: ");
+            scanf("%d", &choose);
+        }
+        enemy[choose-1].def = 0;
+        printf("%s foi amaldicoado!\n\n", enemy[choose-1].class);
+        special[2]--;
+        printf("Digite um numero para continuar: ");
+        scanf("%d", &choose);
+        if(*playerTurn==1)
+            *playerTurn = 2;
+        else
+            *playerTurn = 1;
+    }
     system("cls");
 }
 
@@ -394,7 +416,7 @@ void viewSpecial() {
     printf("Aumenta em +15 pontos de HP de todas as cartas do jogador\n\n");
 
     printf("Maldicao:\n");
-    printf("Permite o jogador escolher uma carta do adversario e deixa-la com 1 ponto para cada atributo de HP e DEF\n\n");
+    printf("Permite o jogador escolher uma carta do oponente e quebrar sua defesa\n\n");
 
     printf("Digite qualquer tecla para voltar ao menu principal: ");
     scanf("%d", &choose);
