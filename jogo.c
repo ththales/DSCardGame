@@ -1,7 +1,7 @@
 /*
     Desenvolvedor: Thales Alves
     Data de início: 29/10/24
-    Data de conclusão:
+    Data de conclusão: 20/11/24
 */
 
 #include <stdio.h>
