@@ -18,6 +18,8 @@ typedef struct {
     int hp, atk, def;
 }Card;
 
+int mainMenu();
+
 void randomizeCards(Card *player, int *special) {
     int num;
     for(int i=0; i<5; i++) {
@@ -88,104 +90,7 @@ void randomizeCards(Card *player, int *special) {
     }
 }
 
-int mainMenu() {
-    system("cls");
-    printf("----- DSCardGame -----\n");
-    printf("1 - Jogar\n");
-    printf("2 - Ver Regras\n");
-    printf("3 - Ver Cartas\n");
-    printf("4 - Ver Habilidades Especiais\n");
-    printf("5 - Sair\n");
-    scanf("%d", &choose);
-    if(choose==1)
-        gameStart();
-    else if(choose==2)
-        viewRules();
-    else if(choose==3)
-        viewCards();
-    else if(choose==4)
-        viewSpecial();
-    else
-        return 0;
-}
-
-void gameStart(){
-    int matchesNumber, turn;
-    int selectedCardP1 = 0, selectedCardP2 = 0;
-    int cardsAliveP1, cardsAliveP2;
-    int specialP1[3], specialP2[3];
-    int firstTurnDoneP1, firstTurnDoneP2;
-    int battleCounter;
-    Card cardsP1[5], cardsP2[5];
-    system("cls");
-    printf("----- Iniciar partida -----\n");
-    printf("Insira o numero de batalhas: ");
-    scanf("%d", &matchesNumber);
-    for(int i=1; i<=matchesNumber; i++) {
-        system("cls");
-        turn = (rand()%2)+1;
-        cardsAliveP1 = cardsAliveP2 = 5;
-        firstTurnDoneP1 = firstTurnDoneP2 = 0;
-        battleCounter = 1;
-        randomizeCards(cardsP1, specialP1);
-        randomizeCards(cardsP2, specialP2);
-        while((cardsAliveP1>0) && (cardsAliveP2>0)) {
-            do {
-                printf("----- Batalha %d -----\n", battleCounter);
-                printf("----- Turno do jogador %d! -----\n", turn);
-                printf("1 - Atacar oponente\n");
-                printf("2 - Ver suas habilidades\n\n");
-                if(turn==1)
-                    viewCardInfo(cardsP1);
-                else
-                    viewCardInfo(cardsP2);
-                printf("Selecione uma opcao: ");
-                scanf("%d", &choose);
-                if(choose==2) {
-                    if(turn==1)
-                        useSpecial(specialP1, cardsP1, cardsP2, &turn);
-                    else
-                        useSpecial(specialP2, cardsP2, cardsP1, &turn);
-                }
-                else
-                    choose = -1;
-            }while(choose!=-1);
-            printf("Numero da carta: ");
-            scanf("%d", &choose);
-            if(turn==1) {
-                while(cardsP1[choose-1].hp<=0) {
-                    printf("Essa carta esta morta! Digite o numero de outra carta: ");
-                    scanf("%d", &choose);
-                }
-            }
-            else {
-                while(cardsP2[choose-1].hp<=0) {
-                    printf("Essa carta esta morta! Digite o numero de outra carta: ");
-                    scanf("%d", &choose);
-                }
-            }
-            system("cls");
-            if(turn==1) {
-                selectedCardP1 = choose-1;
-                firstTurnDoneP1 = 1;
-                turn = 2;
-            }
-            else {
-                selectedCardP2 = choose-1;
-                firstTurnDoneP2 = 1;
-                turn = 1;
-            }
-            if(firstTurnDoneP1!=0 && firstTurnDoneP2!=0) {
-                playerAttack(cardsP1, cardsP2, selectedCardP1, selectedCardP2, &cardsAliveP1, &cardsAliveP2, &turn);
-                printf("\n\nBatalha %d finalizada!\n", battleCounter);
-                firstTurnDoneP1 = firstTurnDoneP2 = 0;
-                battleCounter++;
-            }
-        }
-    }
-}
-
-void playerAttack(Card *player1, Card *player2, int cardP1, int cardP2, int *aliveP1, int *aliveP2, int *playerTurn) {
+void playerAttack(Card *player1, Card *player2, int cardP1, int cardP2, int *aliveP1, int *aliveP2) {
     system("cls");
     int damageP1, damageP2;
     damageP1 = player1[cardP1].atk-player2[cardP2].def;
@@ -219,6 +124,17 @@ void playerAttack(Card *player1, Card *player2, int cardP1, int cardP2, int *ali
     else
         printf("P2: O %s sobreviveu com %d de HP\n", player2[cardP2].class, player2[cardP2].hp);
     printf("------------------------------\n");
+}
+
+void viewCardInfo(Card *player) {
+    printf("----- Suas cartas -----\n\n");
+    for(int i=0; i<5; i++) {
+        if(player[i].hp>0) {
+            printf("Carta %d\n", i+1);
+            printf("Classe: %s\n", player[i].class);
+            printf("HP: %d\nATK: %d\nDEF: %d\n\n", player[i].hp, player[i].atk, player[i].def);
+        }
+    }
 }
 
 void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
@@ -336,13 +252,82 @@ void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
     system("cls");
 }
 
-void viewCardInfo(Card *player) {
-    printf("----- Suas cartas -----\n\n");
-    for(int i=0; i<5; i++) {
-        if(player[i].hp>0) {
-            printf("Carta %d\n", i+1);
-            printf("Classe: %s\n", player[i].class);
-            printf("HP: %d\nATK: %d\nDEF: %d\n\n", player[i].hp, player[i].atk, player[i].def);
+void gameStart(){
+    int matchesNumber, turn;
+    int selectedCardP1 = 0, selectedCardP2 = 0;
+    int cardsAliveP1, cardsAliveP2;
+    int specialP1[3], specialP2[3];
+    int firstTurnDoneP1, firstTurnDoneP2;
+    int battleCounter;
+    Card cardsP1[5], cardsP2[5];
+    system("cls");
+    printf("----- Iniciar partida -----\n");
+    printf("Insira o numero de batalhas: ");
+    scanf("%d", &matchesNumber);
+    for(int i=1; i<=matchesNumber; i++) {
+        system("cls");
+        turn = (rand()%2)+1;
+        cardsAliveP1 = cardsAliveP2 = 5;
+        firstTurnDoneP1 = firstTurnDoneP2 = 0;
+        battleCounter = 1;
+        randomizeCards(cardsP1, specialP1);
+        randomizeCards(cardsP2, specialP2);
+        while((cardsAliveP1>0) && (cardsAliveP2>0)) {
+            do {
+                printf("----- Batalha %d -----\n", battleCounter);
+                printf("----- Turno do jogador %d! -----\n", turn);
+                printf("1 - Atacar oponente\n");
+                printf("2 - Ver suas habilidades\n\n");
+                if(turn==1)
+                    viewCardInfo(cardsP1);
+                else
+                    viewCardInfo(cardsP2);
+                printf("Selecione uma opcao: ");
+                scanf("%d", &choose);
+                if(choose==2) {
+                    if(turn==1)
+                        useSpecial(specialP1, cardsP1, cardsP2, &turn);
+                    else
+                        useSpecial(specialP2, cardsP2, cardsP1, &turn);
+                }
+                else
+                    choose = -1;
+            }while(choose!=-1);
+            printf("Numero da carta: ");
+            scanf("%d", &choose);
+            if(turn==1) {
+                while((choose<0 || choose>5) || (cardsP1[choose-1].hp<=0)) {
+                    printf("Essa carta esta morta ou o numero e invalido! Digite o numero de outra carta: ");
+                    scanf("%d", &choose);
+                }
+            }
+            else {
+                while((choose<0 || choose>5) || (cardsP2[choose-1].hp<=0)) {
+                    printf("Essa carta esta morta ou o numero e invalido! Digite o numero de outra carta: ");
+                    scanf("%d", &choose);
+                }
+            }
+            system("cls");
+            if(turn==1) {
+                selectedCardP1 = choose-1;
+                firstTurnDoneP1 = 1;
+                turn = 2;
+            }
+            else {
+                selectedCardP2 = choose-1;
+                firstTurnDoneP2 = 1;
+                turn = 1;
+            }
+            if(firstTurnDoneP1!=0 && firstTurnDoneP2!=0) {
+                playerAttack(cardsP1, cardsP2, selectedCardP1, selectedCardP2, &cardsAliveP1, &cardsAliveP2);
+                printf("\n\nBatalha %d finalizada!\n", battleCounter);
+                firstTurnDoneP1 = firstTurnDoneP2 = 0;
+                battleCounter++;
+            }
+            if(turn==1)
+                cardsP1[choose-1].def -= 15;
+            else
+                cardsP2[choose-1].def -= 15;
         }
     }
 }
@@ -353,12 +338,9 @@ void viewRules() {
     printf("Objetivo principal: matar a maior quantidade de inimigos do oponente, vencendo o jogador com o maior numero de personagens vivos\n\n");
     printf("Turnos: Cada jogador realiza uma determinada acao em seu turno respectivo, como atacar, adicionar efeito ao oponente ou pular sua vez.\n\n");
     printf("O primeiro jogador de cada turno de uma batalha é escolhido aleatoriamente!\n\n");
-    printf("A cada batalha finalizada, os oponentes perdem 15 de DEF\n\n");
-    printf("- Obs: pular a vez mata uma das cartas do seu deck, portanto use somente se tiver certeza do que esta fazendo\n\n");
-    printf("Cartas: Cada carta possui uma habilidade especial, que podera afetar diretamente o oponente\n\n\n");
+    printf("A cada batalha finalizada, cada carta escolhida perde 15 de DEF\n\n");
     printf("Digite qualquer tecla para voltar ao menu principal: ");
     scanf("%d", &choose);
-    //Limpando a tela do console
     mainMenu();
 }
 
@@ -423,9 +405,40 @@ void viewSpecial() {
     mainMenu();
 }
 
+int mainMenu() {
+    system("cls");
+    printf("----- DSCardGame -----\n");
+    printf("1 - Jogar\n");
+    printf("2 - Ver Regras\n");
+    printf("3 - Ver Cartas\n");
+    printf("4 - Ver Habilidades Especiais\n");
+    printf("5 - Sair\n");
+    scanf("%d", &choose);
+    while(choose<1 || choose>5) {
+        printf("Opcao invalida, tente novamente: ");
+        scanf("%d", &choose);
+    }
+    if(choose==1)
+        gameStart();
+    else if(choose==2)
+        viewRules();
+    else if(choose==3)
+        viewCards();
+    else if(choose==4)
+        viewSpecial();
+    else if(choose==5)
+        return 0;
+    return 1;
+}
+
 int main() {
+    int gameSucessfull;
     srand(time(NULL));
     system("cls");
-    mainMenu();
+    gameSucessfull = mainMenu();
+    if(gameSucessfull==1)
+        printf("Todos os jogos terminaram com sucesso!");
+    else
+        printf("Saindo do jogo...");
     return 0;
 }
