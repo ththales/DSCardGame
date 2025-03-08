@@ -10,14 +10,14 @@
 #include <time.h>
 #include <conio.h>
 
-//Declarando variáveis globais para escolhas no jogo
-char next[100];
+//Declarando a variável global para as escolhas dos jogadores no jogo
 int choose;
 
 //Declarando um registro/estrutura para as cartas dos jogadores
 typedef struct {
-    char class[100];
-    int hp, atk, def;
+    //Declarando variáveis
+    char class[100]; //Nome da classe
+    int hp, atk, def; //Vida, ataque e defesa
 }Card;
 
 void mainMenu();
@@ -94,8 +94,8 @@ void playerAttack(Card *player1, Card *player2, int cardP1, int cardP2, int *ali
     system("cls"); //Limpando a tela/console do terminal
 
     //Declarando variáveis de dano
-    int damageP1, damageP2;
-    int winP1, winP2;
+    int damageP1, damageP2; //Dano do P1 e P2
+    int winP1, winP2; //Vitória de P1 e P2
     winP1 = winP2 = 1;
     
     //Calculando o dano causado pelos jogadores
@@ -109,10 +109,13 @@ void playerAttack(Card *player1, Card *player2, int cardP1, int cardP2, int *ali
         damageP2 = 0; //Zerando o dano do P2
 
     //Verificando se a defesa da carta atual dos jogadores é maior do que 0
+    //P1
     if(player1[cardP1].def>0)
         player1[cardP1].def -= 15; //Reduzindo a defesa da carta atual em 15
     else
         player1[cardP1].def = 0; //Caso contrário a defesa é quebrada
+
+    //P2
     if(player2[cardP2].def>0)
         player2[cardP2].def -= 15; //Reduzindo a defesa da carta atual em 15
     else 
@@ -128,42 +131,63 @@ void playerAttack(Card *player1, Card *player2, int cardP1, int cardP2, int *ali
     printf("O %s (P1) atacou %s (P2)\n", player1[cardP1].class, player2[cardP2].class);
     printf("Mas %s (P2) atacou de volta!\n\n", player2[cardP2].class);
 
-    //Verificando se a carta atual dos jogadores morreu
+    //Verificando o estado da carta atual de P1
     if(player1[cardP1].hp<=0) {
+        //A carta do P1 morreu
         printf("P1: Seu %s morreu e voce perdeu 25 moedas!\n\n", player1[cardP1].class);
         player1[cardP1].hp = 0; //Zerando o HP da carta atual
         *aliveP1 -= 1; //Total de vivos do deck -1
-        *coinsPlayer1 -= 25;
+        *coinsPlayer1 -= 25; //P1 perde 25 moedas
+
+        //Verificando se o saldo de P1 é negativo
         if(*coinsPlayer1<0)
-            *coinsPlayer1 = 0;
-        winP1 = 0;
+            *coinsPlayer1 = 0; //Zerando o saldo de P1 caso seja negativo
+
+        winP1 = 0; //P1 não consegue mais ganhar a batalha
     }
-    else
+    else {
+        //A carta do P1 sobreviveu
         printf("P1: Seu %s sobreviveu com %d de HP!\n\n", player1[cardP1].class, player1[cardP1].hp);
+    }
+
+    //Verificando o estado da carta atual de P2
     if(player2[cardP2].hp<=0) {
+        //A carta do P2 morreu
         printf("P2: Seu %s morreu e voce perdeu 25 moedas!\n\n", player2[cardP2].class);
         player2[cardP2].hp = 0; //Zerando o HP da carta atual
         *aliveP2 -= 1; //Total de vivos do deck -1
-        *coinsPlayer2 -= 25;
+        *coinsPlayer2 -= 25; //P2 perde 25 moedas
+
+        //Verificando se o saldo de P2 é negativo
         if(*coinsPlayer2<0)
-            *coinsPlayer2 = 0;
-        winP2 = 0;
+            *coinsPlayer2 = 0;//Zerando o saldo de P2 caso seja negativo
+
+        winP2 = 0; //P2 não consegue mais ganhar a batalha
     }
-    else
+    else {
+        //A carta do P2 sobreviveu
         printf("P2: Seu %s sobreviveu com %d de HP\n\n", player2[cardP2].class, player2[cardP2].hp);
+    }
+
+    //Verificando qual o resultado da batalha atual
     if(winP1==1 && winP2==0) {
+        //P1 venceu P2
         printf("P1 ganhou a batalha e ganhou 25 moedas!\n\n");
-        *coinsPlayer1 += 25;
+        *coinsPlayer1 += 25; //P1 ganha 25 moedas
     }
     else if(winP1==0 && winP2==1) {
+        //P2 venceu P1
         printf("P1 ganhou a batalha e ganhou 25 moedas!\n\n");
-        *coinsPlayer2 += 25;
+        *coinsPlayer2 += 25; //P2 ganha 25 moedas
     }
-    else
+    else {
+        //Empate
         printf("Nao houve um vencedor dessa batalha!\n\n");
+    }
+
     printf("------------------------------\n\n");
     printf("Digite qualquer tecla para continuar: ");
-    scanf("%s", next);
+    getch();
 }
 
 //Inicializando a função que irá mostrar as cartas contidas no deck do jogador atual e suas informações (Classe, HP, ATK e DEF)
@@ -222,7 +246,7 @@ void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
 
             printf("Voce nao possui cartas para reviver!\n\n");
             printf("Digite qualquer tecla para continuar: ");
-            scanf("%s", next);
+            getch();
         }
         else {
             //Possui, uma vez que o contador foi incrementado
@@ -273,7 +297,7 @@ void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
 
             special[0]--; //Reduzindo em 1 no número do especial Ressurgir dos Mortos
             printf("Digite qualquer tecla para continuar: ");
-            scanf("%s", next);
+            getch();
 
             //Alterando o jogador do turno para a próxima rodada
             if(*playerTurn==1)
@@ -296,7 +320,7 @@ void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
         special[1]--; //Reduzindo em 1 no número do especial Benção Divina
 
         printf("Digite qualquer tecla para continuar: ");
-        scanf("%s", next);
+        getch();
 
         //Alterando o jogador do turno para a próxima rodada
         if(*playerTurn==1)
@@ -326,12 +350,18 @@ void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
         enemy[choose-1].hp /= 2; //HP reduzido pela metade
         enemy[choose-1].def = 0; //Defesa quebrada
 
-        printf("%s foi amaldicoado! Seu HP foi reduzido pela metade e sua DEF quebrada!\n\n", enemy[choose-1].class);
+        //Verificando se a carta amaldiçoada morreu
+        if(enemy[choose-1].hp>0) {
+            printf("%s foi amaldicoado! Seu HP foi reduzido pela metade e sua DEF quebrada!\n\n", enemy[choose-1].class);
+        }
+        else {
+            printf("%s foi amaldicoado e morreu!\n\n", enemy[choose-1].class);
+        }
 
         special[2]--; //Reduzindo em 1 no número do especial Maldição
 
         printf("Digite qualquer tecla para continuar: ");
-        scanf("%s", next);
+        getch();
 
         //Alterando o jogador do turno para a próxima rodada
         if(*playerTurn==1)
@@ -342,6 +372,7 @@ void useSpecial(int *special, Card *player, Card *enemy, int *playerTurn) {
     system("cls"); //Limpando a tela/console do terminal
 }
 
+//Inicializando a função que controlará a loja de uma partida
 void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
     system("cls"); //Limpando a tela/console do terminal
 
@@ -359,8 +390,12 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
         printf("Opcao invalida! Tente novamente: ");
         scanf("%d", &choose);
     }
+
+    //Verificando qual das opções foi escolhida
     if(choose==1) {
-        system("cls");
+        //Melhorias
+        system("cls"); //Limpando a tela/console do terminal
+
         printf("----- Melhorias -----\n\n");
         printf("1 - Aumentar o ATK em +15 (50 moedas)\n");
         printf("2 - Aumentar o HP em +30 (75 moedas)\n");
@@ -371,8 +406,11 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
             printf("Melhoria invalida! Tente novamente: ");
             scanf("%d", &choose);
         }
-        improveCard = choose;
-        system("cls");
+
+        improveCard = choose; //O tipo de melhoria recebe a escolha atual do jogador
+
+        system("cls"); //Limpando a tela/console do terminal
+
         printf("----- Suas cartas -----\n\n");
         viewCardInfo(playerCards);
         printf("Escolha uma carta para melhora-la: ");
@@ -381,8 +419,12 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
             printf("Nao e possivel melhorar uma carta morta ou inexistente, tente novamente: ");
             scanf("%d", &choose);
         }
+
+        //Verificando qual o tipo de melhoria
         if(improveCard==1) {
+            //ATK
             if(*playerCoins>=50) {
+                //A quantidade de moedas é suficiente
                 playerCards[choose-1].atk += 15;
                 *playerCoins -= 50;
                 system("cls");
@@ -390,13 +432,16 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
                 printf("O ataque de %s foi aumentado em 15!\n\n", playerCards[choose-1].class);
             }
             else {
+                //O jogador não tem moedas o suficiente
                 system("cls");
                 printf("----- Loja de Itens -----\n\n");
                 printf("Voce nao possui 50 moedas para comprar essa melhoria!\n\n");
             }
         }
         else if(improveCard==2) {
+            //HP
             if(*playerCoins>=75) {
+                //A quantidade de moedas é suficiente
                 playerCards[choose-1].hp += 30;
                 *playerCoins -= 75;
                 system("cls");
@@ -404,13 +449,16 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
                 printf("O HP de %s foi aumentado em 30!\n\n", playerCards[choose-1].class);
             }
             else {
+                //O jogador não tem moedas o suficiente
                 system("cls");
                 printf("----- Loja de Itens -----\n\n");
                 printf("Voce nao possui 75 moedas para comprar essa melhoria!\n\n");
             }
         }
         else if(improveCard==3){
+            //DEF
             if(*playerCoins>=60) {
+                //A quantidade de moedas é suficiente
                 playerCards[choose-1].def += 50;
                 *playerCoins -= 60;
                 system("cls");
@@ -418,6 +466,7 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
                 printf("A DEF de %s foi aumentada em 50!\n\n", playerCards[choose-1].class);
             }
             else {
+                //O jogador não tem moedas o suficiente
                 system("cls");
                 printf("----- Loja de Itens -----\n\n");
                 printf("Voce nao possui 60 moedas para comprar essa melhoria!\n\n");
@@ -425,7 +474,9 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
         }
     }
     else if(choose==2) {
-        system("cls");
+        //Habilidades
+        system("cls"); //Limpando a tela/console do terminal
+
         printf("----- Habilidades -----\n\n");
         printf("1 - +1 Ressurgir dos mortos (100 moedas)\n");
         printf("2 - +1 Bencao Divina (70 moedas)\n");
@@ -436,8 +487,11 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
             printf("Opcao invalida! Tente novamente: ");
             scanf("%d", &choose);
         }
+
         if(choose==1) {
+            //Ressurgir dos mortos
             if(*playerCoins>=100) {
+                //A quantidade de moedas é suficiente
                 specialPlayer[0]++;
                 *playerCoins -= 100;
                 system("cls");
@@ -445,13 +499,16 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
                 printf("+1 Ressurgir dos Mortos!\n\n");
             }
             else {
+                //O jogador não tem moedas o suficiente
                 system("cls");
                 printf("----- Loja de Itens -----\n\n");
                 printf("Voce nao possui 100 moedas para comprar essa habilidade!\n\n");
             }
         }
         else if(choose==2) {
+            //Benção divina
             if(*playerCoins>=70) {
+                //A quantidade de moedas é suficiente
                 specialPlayer[1]++;
                 *playerCoins -= 70;
                 system("cls");
@@ -459,12 +516,16 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
                 printf("+1 Bencao Divina!\n\n");
             }
             else {
+                //O jogador não tem moedas o suficiente
                 system("cls");
+                printf("----- Loja de Itens -----\n\n");
                 printf("Voce nao possui 70 moedas para comprar essa habilidade!\n\n");
             }
         }
         else if(choose==3){
+            //Maldição
             if(*playerCoins>=90) {
+                //A quantidade de moedas é suficiente
                 specialPlayer[2]++;
                 *playerCoins -= 90;
                 system("cls");
@@ -472,17 +533,20 @@ void itemShop(int *playerCoins, Card *playerCards, int *specialPlayer) {
                 printf("+1 Maldicao!\n\n");
             }
             else {
+                //O jogador não tem moedas o suficiente
                 system("cls");
                 printf("----- Loja de Itens -----\n\n");
                 printf("Voce nao possui 90 moedas para comprar essa habilidade!\n\n");
             }
         }
     }
+    //Verificando se a quantidade de moedas do jogador é negativo
     if(*playerCoins<0)
-        *playerCoins = 0;
+        *playerCoins = 0; //Zerando caso for negativo
+    
     printf("Voce permaneceu com %d moedas.\n\n", *playerCoins);
     printf("Digite qualquer tecla para continuar: ");
-    scanf("%s", next);
+    getch();
 }
 
 //Incializando a função que dará início ao jogo
@@ -505,7 +569,7 @@ void gameStart(){
     printf("paginas amareladas pelo tempo, um brilho dourado invade o ambiente, revelando novos ambientes que pulsam energias do destino. O ar ao seu redor\n");
     printf("se torna  denso e uma voz sombria ecoa ao seus redores...\n\n");
 
-    printf("Bem-vindo, invocadores. Este e o Livro da Conjuracao, guardiao das cartas de herois, monstros e lendas esquecidas\n");
+    printf("Bem-vindos, invocadores. Este e o Livro da Conjuracao, guardiao das cartas de herois, monstros e lendas esquecidas\n");
     printf("Cada carta que voce possui contem nao apenas habilidades, mas tambem as almas daqueles que travaram batalhas epicas nos campos do desconhecido.\n");
     printf("Agora chegou a hora de voces: Trace suas estrategias e prepare-se para enfrentar adversarios que desafiarao sua coragem e inteligencia.\n");
     printf("O caminho a frente nao sera facil. A vitoria nao pertence apenas aos mais fortes, mas aqueles que ousam arriscar e persistir...\n\n");
@@ -526,7 +590,7 @@ void gameStart(){
     printf("Que as cartas escolham bem seu mestre e que os nomes dos vitoriosos ecoem pela eternidade!\n\n");
 
     printf("Digite qualquer tecla para iniciar: ");
-    scanf("%s", next);
+    getch();
 
     //Inicializando a partida atual
     for(int i=1; i<=matchesNumber; i++) {
@@ -653,7 +717,7 @@ void gameStart(){
     }
     
     printf("Digite qualquer tecla para voltar ao menu principal: ");
-    scanf("%s", next);
+    getch();
     mainMenu();
 }
 
@@ -663,14 +727,14 @@ void viewRules() {
 
     printf("----- Regras -----\n\n");
     printf("Objetivo principal: matar a maior quantidade de inimigos do oponente, vencendo o jogador com o maior numero de personagens vivos\n\n");
-    printf("Turnos: Cada jogador realiza uma determinada acao em seu turno respectivo, como atacar, adicionar efeito ao oponente ou pular sua vez.\n\n");
+    printf("Turnos: Cada jogador realiza uma determinada acao em seu turno respectivo, como atacar ou adicionar efeito ao oponente.\n\n");
     printf("O primeiro jogador de cada turno de uma batalha e escolhido aleatoriamente!\n\n");
     printf("A cada batalha finalizada, cada carta escolhida no turno perde 15 de DEF\n\n");
     printf("Para toda partida iniciada, cada jogador inicia com 100 moedas disponiveis para gastar na loja.\n\n");
     printf("Se o jogador ganha uma batalha contra o oponente 25 moedas sao adicionadas a ele. Caso perca, a mesma quantia e retirada dele.\n\n");
 
     printf("Digite qualquer tecla para voltar ao menu principal: ");
-    scanf("%s", next);
+    getch();
     mainMenu();
 }
 
@@ -714,7 +778,7 @@ void viewCards() {
     printf("HP: 80\nATK: 45\nDEF: 55\n\n");
 
     printf("Digite qualquer tecla para voltar ao menu principal: ");
-    scanf("%s", next);
+    getch();
     mainMenu();
 }
 
@@ -736,7 +800,7 @@ void viewSpecial() {
     
     printf("Digite qualquer tecla para voltar ao menu principal: ");
 
-    scanf("%s", next);
+    getch();
     mainMenu();
 }
 
